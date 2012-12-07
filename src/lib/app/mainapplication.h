@@ -40,6 +40,7 @@ class CookieJar;
 class RSSManager;
 class Updater;
 class PluginProxy;
+class Extensions;
 class BookmarksModel;
 class DownloadManager;
 class AutoFillModel;
@@ -99,6 +100,7 @@ public:
     CookieJar* cookieJar();
     RSSManager* rssManager();
     PluginProxy* plugins();
+	Extensions* extensions();
     BookmarksModel* bookmarksModel();
     DownloadManager* downManager();
     AutoFillModel* autoFill();
@@ -153,6 +155,7 @@ private:
     CookieJar* m_cookiejar;
     RSSManager* m_rssmanager;
     PluginProxy* m_plugins;
+	Extensions* m_extensions;
     BookmarksModel* m_bookmarksModel;
     DownloadManager* m_downloadManager;
     AutoFillModel* m_autofill;

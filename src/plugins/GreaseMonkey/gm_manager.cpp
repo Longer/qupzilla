@@ -88,7 +88,7 @@ QString GM_Manager::requireScripts(const QStringList &urlList) const
 void GM_Manager::unloadPlugin()
 {
     // Save settings
-    QSettings settings(m_settingsPath + "extensions.ini", QSettings::IniFormat);
+    QSettings settings(m_settingsPath + "plugins.ini", QSettings::IniFormat);
     settings.beginGroup("GreaseMonkey");
     settings.setValue("disabledScripts", m_disabledScripts);
     settings.endGroup();
@@ -220,7 +220,7 @@ void GM_Manager::load()
         gmDir.mkdir("requires");
     }
 
-    QSettings settings(m_settingsPath + "extensions.ini", QSettings::IniFormat);
+    QSettings settings(m_settingsPath + "plugins.ini", QSettings::IniFormat);
     settings.beginGroup("GreaseMonkey");
     m_disabledScripts = settings.value("disabledScripts", QStringList()).toStringList();
 

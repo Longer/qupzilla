@@ -22,6 +22,7 @@
 #include "iconprovider.h"
 #include "websearchbar.h"
 #include "reloadstopbutton.h"
+#include "extbutton.h"
 #include "webhistorywrapper.h"
 #include "enhancedmenu.h"
 #include "tabwidget.h"
@@ -67,6 +68,8 @@ NavigationBar::NavigationBar(QupZilla* mainClass)
     m_layout->setMargin(3);
     m_layout->setSpacing(3);
     setLayout(m_layout);
+
+	m_layout_ext = new QHBoxLayout();
 
     m_buttonBack = new ToolButton(this);
     m_buttonBack->setObjectName("navigation-button-back");
@@ -141,10 +144,11 @@ NavigationBar::NavigationBar(QupZilla* mainClass)
     m_layout->addWidget(m_buttonHome);
     m_layout->addWidget(m_buttonAddTab);
     m_layout->addWidget(m_navigationSplitter);
+	m_layout->addLayout(m_layout_ext);
 #ifndef Q_OS_MAC
     m_layout->addWidget(m_supMenu);
 #endif
-    m_layout->addWidget(m_exitFullscreen);
+    //m_layout->addWidget(m_exitFullscreen);
 
     connect(m_menuBack, SIGNAL(aboutToShow()), this, SLOT(aboutToShowHistoryBackMenu()));
     connect(m_menuForward, SIGNAL(aboutToShow()), this, SLOT(aboutToShowHistoryNextMenu()));
@@ -355,4 +359,9 @@ void NavigationBar::goForwardInNewTab()
     }
 
     goAtHistoryIndexInNewTab(itemIndex);
+}
+
+void NavigationBar::addExtButton(){
+	m_ExtButton.push_back(new ExtButton());
+	m_layout_ext->addWidget(m_ExtButton[m_ExtButton.size() - 1]);
 }

@@ -28,6 +28,7 @@ INCLUDEPATH += 3rdparty\
                utils\
                webview\
                plugins\
+			   extensions\
                sidebar\
                data\
                adblock\
@@ -70,6 +71,7 @@ SOURCES += \
     other/aboutdialog.cpp \
     plugins/plugins.cpp \
     plugins/pluginproxy.cpp \
+	extensions/extensions.cpp \
     tools/clickablelabel.cpp \
     downloads/downloadoptionsdialog.cpp \
     tools/treewidget.cpp \
@@ -120,6 +122,7 @@ SOURCES += \
     tools/toolbutton.cpp \
     navigation/navigationbar.cpp \
     navigation/reloadstopbutton.cpp \
+	navigation/extbutton.cpp \
     preferences/thememanager.cpp \
     tools/globalfunctions.cpp \
     other/pagescreen.cpp \
@@ -225,6 +228,7 @@ HEADERS  += \
     plugins/plugininterface.h \
     plugins/plugins.h \
     plugins/pluginproxy.h \
+	extensions/extensions.h \
     tools/clickablelabel.h \
     downloads/downloadoptionsdialog.h \
     tools/treewidget.h \
@@ -274,6 +278,7 @@ HEADERS  += \
     tools/toolbutton.h \
     navigation/navigationbar.h \
     navigation/reloadstopbutton.h \
+	navigation/extbutton.h \
     preferences/thememanager.h \
     tools/globalfunctions.h \
     other/pagescreen.h \

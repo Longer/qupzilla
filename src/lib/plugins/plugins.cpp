@@ -123,7 +123,7 @@ void Plugins::loadPlugins()
         return;
     }
 
-    QDir settingsDir(mApp->currentProfilePath() + "extensions/");
+    QDir settingsDir(mApp->currentProfilePath() + "plugins/");
     if (!settingsDir.exists()) {
         settingsDir.mkdir(settingsDir.absolutePath());
     }
@@ -150,7 +150,7 @@ void Plugins::loadPlugins()
 
     refreshLoadedPlugins();
 
-    std::cout << "QupZilla: " << m_loadedPlugins.count() << " extensions loaded"  << std::endl;
+    std::cout << "QupZilla: " << m_loadedPlugins.count() << " plugins loaded"  << std::endl;
 }
 
 void Plugins::loadAvailablePlugins()
@@ -207,7 +207,7 @@ PluginInterface* Plugins::initPlugin(PluginInterface* interface, QPluginLoader* 
         return 0;
     }
 
-    interface->init(mApp->currentProfilePath() + "extensions/");
+    interface->init(mApp->currentProfilePath() + "plugins/");
 
     if (!interface->testPlugin()) {
         interface->unload();

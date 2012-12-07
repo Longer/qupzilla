@@ -28,6 +28,7 @@
 #include "updater.h"
 #include "autosaver.h"
 #include "pluginproxy.h"
+#include "extensions.h"
 #include "bookmarksmodel.h"
 #include "downloadmanager.h"
 #include "autofillmodel.h"
@@ -248,6 +249,8 @@ MainApplication::MainApplication(int &argc, char** argv)
     if (!noAddons) {
         m_plugins->loadPlugins();
     }
+
+	m_extensions = new Extensions;
 
     if (!m_isPrivateSession) {
         Settings settings;
@@ -741,6 +744,11 @@ RSSManager* MainApplication::rssManager()
 PluginProxy* MainApplication::plugins()
 {
     return m_plugins;
+}
+
+Extensions* MainApplication::extensions()
+{
+    return m_extensions;
 }
 
 BookmarksModel* MainApplication::bookmarksModel()

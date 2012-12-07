@@ -29,6 +29,7 @@ class ToolButton;
 class WebSearchBar;
 class QupZilla;
 class ReloadStopButton;
+class ExtButton;
 class Menu;
 class QUrl;
 
@@ -63,6 +64,8 @@ public slots:
     void goForward();
     void goForwardInNewTab();
 
+	void addExtButton();
+
 private slots:
     void aboutToShowHistoryNextMenu();
     void aboutToShowHistoryBackMenu();
@@ -79,6 +82,7 @@ private:
     QupZilla* p_QupZilla;
 
     QHBoxLayout* m_layout;
+	QHBoxLayout* m_layout_ext;
     QSplitter* m_navigationSplitter;
     ToolButton* m_buttonBack;
     ToolButton* m_buttonNext;
@@ -87,6 +91,7 @@ private:
     ToolButton* m_supMenu;
     ToolButton* m_exitFullscreen;
     ReloadStopButton* m_reloadStop;
+	QVector<ExtButton*> m_ExtButton;
 
     Menu* m_menuBack;
     Menu* m_menuForward;
