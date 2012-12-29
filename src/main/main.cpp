@@ -31,6 +31,12 @@
 #include <QDateTime>
 #include <QTextStream>
 
+#if QT_VERSION >= 0x050000
+#include <QWebPage>
+#else
+#include "qwebkitversion.h"
+#endif
+
 void qupzilla_signal_handler(int s)
 {
     switch (s) {
@@ -111,7 +117,7 @@ int main(int argc, char* argv[])
 {
     QT_REQUIRE_VERSION(argc, argv, "4.7.0");
 
-#ifdef Q_WS_X11
+#if defined(QZ_WS_X11) && QT_VERSION < 0x050000
     QApplication::setGraphicsSystem("raster"); // Better overall performance on X11
 #endif
 

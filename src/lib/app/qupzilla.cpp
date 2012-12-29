@@ -81,8 +81,11 @@
 #include <QWebHistory>
 #include <QMessageBox>
 
-#ifdef Q_WS_X11
-#include <QX11Info>
+#if QT_VERSION < 0x050000
+#include "qwebkitversion.h"
+#endif
+
+#ifdef QZ_WS_X11
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 #endif
@@ -122,7 +125,7 @@ QupZilla::QupZilla(Qz::BrowserWindow type, QUrl startUrl)
 
     m_isStarting = true;
 
-#ifndef Q_WS_X11
+#ifndef QZ_WS_X11
     setUpdatesEnabled(false);
 #endif
 
@@ -135,7 +138,7 @@ QupZilla::QupZilla(Qz::BrowserWindow type, QUrl startUrl)
 
 void QupZilla::postLaunch()
 {
-#ifdef Q_WS_X11
+#ifdef QZ_WS_X11
     setUpdatesEnabled(false);
 #endif
 
@@ -309,7 +312,14 @@ void QupZilla::setupMenu()
 
     m_actionQuit = new QAction(QIcon::fromTheme("application-exit"), tr("Quit"), 0);
     m_actionQuit->setMenuRole(QAction::QuitRole);
-    m_actionQuit->setShortcut(QKeySequence(QKeySequence::Quit));
+    QKeySequence quitSequence = QKeySequence(QKeySequence::Quit);
+#ifdef QZ_WS_X11
+    // QKeySequence::Quit returns a non-empty sequence on X11 only when running Gnome or Kde
+    if (quitSequence.isEmpty()) {
+        quitSequence = QKeySequence(Qt::CTRL + Qt::Key_Q);
+    }
+#endif
+    m_actionQuit->setShortcut(quitSequence);
     connect(m_actionQuit, SIGNAL(triggered()), this, SLOT(quitApp()));
 
     /*************
@@ -317,7 +327,7 @@ void QupZilla::setupMenu()
      *************/
     m_menuFile = new QMenu(tr("&File"));
     m_menuFile->addAction(QIcon::fromTheme("window-new"), tr("&New Window"), this, SLOT(newWindow()))->setShortcut(QKeySequence("Ctrl+N"));
-    m_menuFile->addAction(QIcon(":/icons/menu/popup.png"), tr("New Tab"), this, SLOT(addTab()))->setShortcut(QKeySequence("Ctrl+T"));
+    m_menuFile->addAction(QIcon(":/icons/menu/new-tab.png"), tr("New Tab"), this, SLOT(addTab()))->setShortcut(QKeySequence("Ctrl+T"));
     m_menuFile->addAction(QIcon::fromTheme("document-open-remote"), tr("Open Location"), this, SLOT(openLocation()))->setShortcut(QKeySequence("Ctrl+L"));
     m_menuFile->addAction(QIcon::fromTheme("document-open"), tr("Open &File"), this, SLOT(openFile()))->setShortcut(QKeySequence("Ctrl+O"));
     m_menuFile->addAction(tr("Close Tab"), m_tabWidget, SLOT(closeTab()))->setShortcut(QKeySequence("Ctrl+W"));
@@ -353,7 +363,7 @@ void QupZilla::setupMenu()
     m_menuEdit->addAction(QIcon::fromTheme("edit-select-all"), tr("Select &All"), this, SLOT(editSelectAll()))->setShortcut(QKeySequence("Ctrl+A"));
     m_menuEdit->addAction(QIcon::fromTheme("edit-find"), tr("&Find"), this, SLOT(searchOnPage()))->setShortcut(QKeySequence("Ctrl+F"));
     m_menuEdit->addSeparator();
-#ifdef Q_WS_X11
+#ifdef QZ_WS_X11
     m_menuEdit->addAction(m_actionPreferences);
 #endif
     connect(m_menuEdit, SIGNAL(aboutToShow()), this, SLOT(aboutToShowEditMenu()));
@@ -391,6 +401,12 @@ void QupZilla::setupMenu()
     m_menuEncoding = new QMenu(this);
     actionEncoding->setMenu(m_menuEncoding);
     connect(m_menuEncoding, SIGNAL(aboutToShow()), this, SLOT(aboutToShowEncodingMenu()));
+#if QT_VERSION >= 0x050000
+    m_actionCaretBrowsing = new QAction(tr("Enable &Caret Browsing"), this);
+    m_actionCaretBrowsing->setCheckable(true);
+    m_actionCaretBrowsing->setShortcut(QKeySequence("F7"));
+    connect(m_actionCaretBrowsing, SIGNAL(triggered()), this, SLOT(triggerCaretBrowsing()));
+#endif
 
     QMenu* toolbarsMenu = new QMenu(tr("Toolbars"));
 #ifndef Q_OS_MAC
@@ -412,6 +428,9 @@ void QupZilla::setupMenu()
     m_menuView->addAction(QIcon::fromTheme("zoom-out"), tr("Zoom &Out"), this, SLOT(zoomOut()))->setShortcut(QKeySequence("Ctrl+-"));
     m_menuView->addAction(QIcon::fromTheme("zoom-original"), tr("Reset"), this, SLOT(zoomReset()))->setShortcut(QKeySequence("Ctrl+0"));
     m_menuView->addSeparator();
+#if QT_VERSION >= 0x050000
+    m_menuView->addAction(m_actionCaretBrowsing);
+#endif
     m_menuView->addAction(actionEncoding);
     m_menuView->addSeparator();
     m_menuView->addAction(QIcon::fromTheme("text-html"), tr("&Page Source"), this, SLOT(showSource()))->setShortcut(QKeySequence("Ctrl+U"));
@@ -474,7 +493,7 @@ void QupZilla::setupMenu()
     connect(m_actionPrivateBrowsing, SIGNAL(triggered(bool)), mApp, SLOT(startPrivateBrowsing()));
     m_menuTools->addAction(m_actionPrivateBrowsing);
     m_menuTools->addSeparator();
-#if !defined(Q_WS_X11) && !defined(Q_OS_MAC)
+#if !defined(QZ_WS_X11) && !defined(Q_OS_MAC)
     m_menuTools->addAction(m_actionPreferences);
 #endif
 
@@ -622,7 +641,7 @@ void QupZilla::loadSettings()
         return;
     }
     //Opacity
-#ifdef Q_WS_X11
+#ifdef QZ_WS_X11
     setAttribute(Qt::WA_TranslucentBackground);
     setAttribute(Qt::WA_NoSystemBackground, false);
     QPalette pal = palette();
@@ -959,6 +978,10 @@ void QupZilla::aboutToShowViewMenu()
 #endif
     m_actionShowStatusbar->setChecked(statusBar()->isVisible());
     m_actionShowBookmarksToolbar->setChecked(m_bookmarksToolbar->isVisible());
+
+#if QT_VERSION >= 0x050000
+    m_actionCaretBrowsing->setChecked(mApp->webSettings()->testAttribute(QWebSettings::CaretBrowsingEnabled));
+#endif
 }
 
 void QupZilla::aboutToShowEditMenu()
@@ -999,7 +1022,8 @@ void QupZilla::aboutToShowEncodingMenu()
     const QString &activeCodec = mApp->webSettings()->defaultTextEncoding();
 
     foreach(const QByteArray & name, available) {
-        if (QTextCodec::codecForName(name)->aliases().contains(name)) {
+        QTextCodec* codec = QTextCodec::codecForName(name);
+        if (codec && codec->aliases().contains(name)) {
             continue;
         }
 
@@ -1063,6 +1087,20 @@ void QupZilla::changeEncoding()
         reload();
     }
 }
+
+#if QT_VERSION >= 0x050000
+void QupZilla::triggerCaretBrowsing()
+{
+    bool enable = !mApp->webSettings()->testAttribute(QWebSettings::CaretBrowsingEnabled);
+
+    Settings settings;
+    settings.beginGroup("Web-Browser-Settings");
+    settings.setValue("CaretBrowsing", enable);
+    settings.endGroup();
+
+    mApp->webSettings()->setAttribute(QWebSettings::CaretBrowsingEnabled, enable);
+}
+#endif
 
 void QupZilla::bookmarkPage()
 {
@@ -1835,7 +1873,7 @@ void QupZilla::disconnectObjects()
         tab->view()->page()->disconnectObjects();
     }
 
-    foreach(const QWeakPointer<QWidget> &pointer, m_deleteOnCloseWidgets) {
+    foreach(const QPointer<QWidget> &pointer, m_deleteOnCloseWidgets) {
         if (pointer) {
             pointer.data()->deleteLater();
         }
@@ -1875,7 +1913,7 @@ bool QupZilla::quitApp()
 
 QByteArray QupZilla::saveState(int version) const
 {
-#ifdef Q_WS_X11
+#ifdef QZ_WS_X11
     QByteArray data;
     QDataStream stream(&data, QIODevice::WriteOnly);
 
@@ -1890,7 +1928,7 @@ QByteArray QupZilla::saveState(int version) const
 
 bool QupZilla::restoreState(const QByteArray &state, int version)
 {
-#ifdef Q_WS_X11
+#ifdef QZ_WS_X11
     QByteArray windowState;
     int desktopId = -1;
 
@@ -1906,10 +1944,10 @@ bool QupZilla::restoreState(const QByteArray &state, int version)
 #endif
 }
 
-#ifdef Q_WS_X11
+#ifdef QZ_WS_X11
 int QupZilla::getCurrentVirtualDesktop() const
 {
-    Display* display = QX11Info::display();
+    Display* display = static_cast<Display*>(qz_X11Display(this));
     Atom actual_type;
     int actual_format;
     unsigned long nitems;
@@ -1942,7 +1980,7 @@ void QupZilla::moveToVirtualDesktop(int desktopId)
         return;
     }
 
-    Display* display = QX11Info::display();
+    Display* display = static_cast<Display*>(qz_X11Display(this));
 
     Atom net_wm_desktop = XInternAtom(display, "_NET_WM_DESKTOP", False);
     if (net_wm_desktop == None) {
@@ -1950,7 +1988,8 @@ void QupZilla::moveToVirtualDesktop(int desktopId)
     }
 
     // Fixes issue when the property wasn't set on some X servers
-    setVisible(true);
+    // hmmm does it?
+    //setVisible(true);
 
     XChangeProperty(display, winId(), net_wm_desktop, XA_CARDINAL,
                     32, PropModeReplace, (unsigned char*) &desktopId, 1L);

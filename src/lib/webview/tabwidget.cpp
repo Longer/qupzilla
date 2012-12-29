@@ -33,6 +33,7 @@
 
 #include <QMovie>
 #include <QMenu>
+#include <QMimeData>
 #include <QStackedWidget>
 #include <QMouseEvent>
 #include <QWebHistory>
@@ -722,6 +723,8 @@ void TabWidget::savePinnedTabs()
     QByteArray data;
     QDataStream stream(&data, QIODevice::WriteOnly);
 
+    stream << Qz::sessionVersion;
+
     QStringList tabs;
     QList<QByteArray> tabsHistory;
     for (int i = 0; i < count(); ++i) {
@@ -756,6 +759,12 @@ void TabWidget::restorePinnedTabs()
 
     QDataStream stream(&sd, QIODevice::ReadOnly);
     if (stream.atEnd()) {
+        return;
+    }
+
+    int version;
+    stream >> version;
+    if (version != Qz::sessionVersion) {
         return;
     }
 

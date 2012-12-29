@@ -20,6 +20,8 @@
 #include "mainapplication.h"
 #include "settings.h"
 
+#include <QNetworkCookie>
+#include <QWebSettings>
 #include <QDateTime>
 #include <QDebug>
 
@@ -94,6 +96,12 @@ void CookieJar::loadSettings()
     m_whitelist = settings.value("whitelist", QStringList()).toStringList();
     m_blacklist = settings.value("blacklist", QStringList()).toStringList();
     settings.endGroup();
+
+#if QT_VERSION >= 0x050000
+    mApp->webSettings()->setThirdPartyCookiePolicy(m_blockThirdParty ?
+            QWebSettings::AlwaysBlockThirdPartyCookies :
+            QWebSettings::AlwaysAllowThirdPartyCookies);
+#endif
 }
 
 void CookieJar::setAllowCookies(bool allow)
@@ -103,6 +111,8 @@ void CookieJar::setAllowCookies(bool allow)
 
 bool CookieJar::rejectCookie(const QString &domain, const QNetworkCookie &cookie) const
 {
+    Q_UNUSED(domain)
+
     const QString &cookieDomain = cookie.domain();
 
     if (!m_allowCookies) {
@@ -125,6 +135,8 @@ bool CookieJar::rejectCookie(const QString &domain, const QNetworkCookie &cookie
         }
     }
 
+// This feature is now natively in QtWebKit in Qt 5
+#if QT_VERSION < 0x050000
     if (m_blockThirdParty) {
         bool result = blockThirdParty(cookieDomain, domain);
         if (result) {
@@ -134,6 +146,7 @@ bool CookieJar::rejectCookie(const QString &domain, const QNetworkCookie &cookie
             return true;
         }
     }
+#endif
 
     if (m_filterTrackingCookie && cookie.name().startsWith("__utm")) {
 #ifdef COOKIE_DEBUG

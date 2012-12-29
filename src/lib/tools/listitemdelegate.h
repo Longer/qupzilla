@@ -15,50 +15,27 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 * ============================================================ */
-#ifndef LOCATIONCOMPLETER_H
-#define LOCATIONCOMPLETER_H
+#ifndef LISTITEMDELEGATE_H
+#define LISTITEMDELEGATE_H
 
-#include <QObject>
+#include <QStyledItemDelegate>
 
 #include "qz_namespace.h"
 
-class QModelIndex;
-
-class LocationCompleterModel;
-class LocationCompleterView;
-class LocationBar;
-
-class QT_QUPZILLA_EXPORT LocationCompleter : public QObject
+class QT_QUPZILLA_EXPORT ListItemDelegate : public QStyledItemDelegate
 {
-    Q_OBJECT
 public:
-    explicit LocationCompleter(QObject* parent = 0);
+    explicit ListItemDelegate(int iconSize, QWidget* parent);
 
-    void setLocationBar(LocationBar* locationBar);
-    void closePopup();
+    int itemHeight() const;
 
-signals:
-    void showCompletion(const QString &);
-    void completionActivated();
-
-public slots:
-    void complete(const QString &string);
-    void showMostVisited();
-
-private slots:
-    void currentChanged(const QModelIndex &index);
-    void popupClosed();
+    void paint(QPainter* painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
+    QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const;
 
 private:
-    void showPopup();
-    void adjustPopupSize();
-
-    LocationBar* m_locationBar;
-    QString m_originalText;
-    bool m_ignoreCurrentChangedSignal;
-
-    static LocationCompleterView* s_view;
-    static LocationCompleterModel* s_model;
+    int m_iconSize;
+    mutable int m_itemHeight;
+    mutable int m_padding;
 };
 
-#endif // LOCATIONCOMPLETER_H
+#endif // LISTITEMDELEGATE_H

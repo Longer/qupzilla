@@ -20,8 +20,9 @@
 #define RESTOREMANAGER_H
 
 #include "webtab.h"
+#include "qz_namespace.h"
 
-class RestoreManager
+class QT_QUPZILLA_EXPORT RestoreManager
 {
 public:
     struct WindowData {
@@ -33,6 +34,7 @@ public:
     RestoreManager(const QString &sessionFile);
 
     QList<RestoreManager::WindowData> restoreData() const;
+    bool isValid() const;
 
 private:
     void createFromFile(const QString &file);

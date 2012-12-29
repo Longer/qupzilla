@@ -28,6 +28,12 @@
 
 namespace Qz
 {
+// Version of session.dat file
+#if QT_VERSION >= 0x050000
+static const int sessionVersion = 0x0003 | 0x050000;
+#else
+static const int sessionVersion = 0x0003;
+#endif
 
 enum AppMessageType {
     AM_SetAdBlockIconEnabled,
@@ -84,7 +90,7 @@ Q_DECLARE_OPERATORS_FOR_FLAGS(Qz::NewTabPositionFlags)
 
 #ifdef Q_OS_WIN
 #define DEFAULT_THEME_NAME "windows"
-#elif defined(Q_WS_X11)
+#elif defined(QZ_WS_X11)
 #define DEFAULT_THEME_NAME "linux"
 #elif defined(Q_OS_MAC)
 #define DEFAULT_THEME_NAME "mac"

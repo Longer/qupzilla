@@ -97,7 +97,7 @@ MainApplication::MainApplication(int &argc, char** argv)
     , m_databaseConnected(false)
     , m_registerQAppAssociation(0)
 {
-#if defined(Q_WS_X11) && !defined(NO_SYSTEM_DATAPATH)
+#if defined(QZ_WS_X11) && !defined(NO_SYSTEM_DATAPATH)
     DATADIR = USE_DATADIR;
 #else
     DATADIR = qApp->applicationDirPath() + "/";
@@ -272,6 +272,9 @@ MainApplication::MainApplication(int &argc, char** argv)
         }
         if (m_startingAfterCrash || afterLaunch == 3) {
             m_restoreManager = new RestoreManager(m_activeProfil + "session.dat");
+            if (!m_restoreManager->isValid()) {
+                destroyRestoreManager();
+            }
         }
     }
 
@@ -312,7 +315,7 @@ void MainApplication::loadSettings()
     cssFile.open(QFile::ReadOnly);
     QString css = cssFile.readAll();
     cssFile.close();
-#ifdef Q_WS_X11
+#ifdef QZ_WS_X11
     if (QFile(m_activeThemePath + "linux.css").exists()) {
         cssFile.setFileName(m_activeThemePath + "linux.css");
         cssFile.open(QFile::ReadOnly);
@@ -360,6 +363,7 @@ void MainApplication::loadSettings()
         m_websettings->enablePersistentStorage(m_activeProfil);
         m_websettings->setAttribute(QWebSettings::LocalStorageEnabled, settings.value("HTML5StorageEnabled", true).toBool());
     }
+
     m_websettings->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
     m_websettings->setAttribute(QWebSettings::PluginsEnabled, settings.value("allowFlash", true).toBool());
     m_websettings->setAttribute(QWebSettings::JavascriptEnabled, settings.value("allowJavaScript", true).toBool());
@@ -373,6 +377,11 @@ void MainApplication::loadSettings()
     m_websettings->setAttribute(QWebSettings::XSSAuditingEnabled, settings.value("XSSAuditing", false).toBool());
     m_websettings->setMaximumPagesInCache(settings.value("maximumCachedPages", 3).toInt());
     m_websettings->setDefaultTextEncoding(settings.value("DefaultEncoding", m_websettings->defaultTextEncoding()).toString());
+
+#if QT_VERSION >= 0x050000
+    m_websettings->setAttribute(QWebSettings::CaretBrowsingEnabled, settings.value("CaretBrowsing", false).toBool());
+    m_websettings->setAttribute(QWebSettings::ScrollAnimatorEnabled, settings.value("AnimateScrolling", true).toBool());
+#endif
 
 #ifdef USE_WEBGL
     m_websettings->setAttribute(QWebSettings::WebGLEnabled, true);
@@ -862,8 +871,7 @@ QUrl MainApplication::userStyleSheet(const QString &filePath) const
 {
     // Set default white background for all sites
     // Fixes issue with dark themes when sites don't set background
-
-    QString userStyle /*= "body{background-color:white;}"*/;
+    QString userStyle /*= "html{background-color:white;}"*/;
     userStyle += AdBlockManager::instance()->elementHidingRules() + "{ display:none !important;}";
 
     QFile file(filePath);
@@ -874,7 +882,7 @@ QUrl MainApplication::userStyleSheet(const QString &filePath) const
         file.close();
     }
 
-    const QString &encodedStyle = userStyle.toAscii().toBase64();
+    const QString &encodedStyle = userStyle.toLatin1().toBase64();
     const QString &dataString = QString("data:text/css;charset=utf-8;base64,%1").arg(encodedStyle);
 
     return QUrl(dataString);
@@ -899,9 +907,6 @@ void MainApplication::aboutToCloseWindow(QupZilla* window)
     m_mainWindows.removeOne(window);
 }
 
-// Version of session.dat file
-static const int sessionVersion = 0x0003;
-
 bool MainApplication::saveStateSlot()
 {
     if (m_isPrivateSession || m_isRestoring || m_mainWindows.count() == 0 || m_restoreManager) {
@@ -912,7 +917,7 @@ bool MainApplication::saveStateSlot()
     file.open(QIODevice::WriteOnly);
     QDataStream stream(&file);
 
-    stream << sessionVersion;
+    stream << Qz::sessionVersion;
     stream << m_mainWindows.count();
 
     for (int i = 0; i < m_mainWindows.count(); i++) {

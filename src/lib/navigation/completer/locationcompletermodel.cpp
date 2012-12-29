@@ -39,6 +39,7 @@ bool countBiggerThan(const QStandardItem* i1, const QStandardItem* i2)
 void LocationCompleterModel::refreshCompletions(const QString &string)
 {
     if (m_lastCompletion == string) {
+        refreshTabPositions();
         return;
     }
 
@@ -72,7 +73,7 @@ void LocationCompleterModel::refreshCompletions(const QString &string)
             item->setData(query.value(3), CountRole);
             item->setData(QVariant(true), BookmarkRole);
             item->setData(string, SearchStringRole);
-            if(qzSettings->showSwitchTab) {
+            if (qzSettings->showSwitchTab) {
                 item->setData(QVariant::fromValue<TabPosition>(tabPositionForUrl(url)), TabPositionRole);
             }
 
@@ -98,7 +99,7 @@ void LocationCompleterModel::refreshCompletions(const QString &string)
             item->setData(query.value(3), CountRole);
             item->setData(QVariant(false), BookmarkRole);
             item->setData(string, SearchStringRole);
-            if(qzSettings->showSwitchTab) {
+            if (qzSettings->showSwitchTab) {
                 item->setData(QVariant::fromValue<TabPosition>(tabPositionForUrl(url)), TabPositionRole);
             }
 
@@ -128,7 +129,7 @@ void LocationCompleterModel::showMostVisited()
         item->setData(query.value(0), IdRole);
         item->setData(query.value(2), TitleRole);
         item->setData(QVariant(false), BookmarkRole);
-        if(qzSettings->showSwitchTab) {
+        if (qzSettings->showSwitchTab) {
             item->setData(QVariant::fromValue<TabPosition>(tabPositionForUrl(url)), TabPositionRole);
         }
 
@@ -198,19 +199,42 @@ QSqlQuery LocationCompleterModel::createQuery(const QString &searchString, const
     return sqlQuery;
 }
 
-TabPosition LocationCompleterModel::tabPositionForUrl(const QUrl& url) const
+TabPosition LocationCompleterModel::tabPositionForUrl(const QUrl &url) const
 {
-    for(int win=0; win < mApp->windowCount(); ++win) {
-        QupZilla* mainWin = mApp->mainWindows().at(win);
+    return tabPositionForEncodedUrl(url.toEncoded());
+}
+
+TabPosition LocationCompleterModel::tabPositionForEncodedUrl(const QString &encodedUrl) const
+{
+    QList<QupZilla*> windows = mApp->mainWindows();
+    int currentWindowIdx = windows.indexOf(mApp->getWindow());
+    windows.prepend(mApp->getWindow());
+    for (int win = 0; win < windows.count(); ++win) {
+        QupZilla* mainWin = windows.at(win);
         QList<WebTab*> tabs = mainWin->tabWidget()->allTabs();
-        for(int tab=0; tab < tabs.count(); ++tab) {
-            if(tabs[tab]->url() == url) {
+        for (int tab = 0; tab < tabs.count(); ++tab) {
+            if (tabs[tab]->url().toEncoded() == encodedUrl) {
                 TabPosition pos;
-                pos.windowIndex = win;
+                pos.windowIndex = win == 0 ? currentWindowIdx : win - 1;
                 pos.tabIndex = tab;
                 return pos;
             }
         }
     }
     return TabPosition();
+}
+
+void LocationCompleterModel::refreshTabPositions()
+{
+    if (!qzSettings->showSwitchTab) {
+        return;
+    }
+
+    for (int row = 0; row < rowCount(); ++row) {
+        QStandardItem* aItem = item(row);
+        if (!aItem) {
+            continue;
+        }
+        aItem->setData(QVariant::fromValue<TabPosition>(tabPositionForEncodedUrl(aItem->text())), TabPositionRole);
+    }
 }
