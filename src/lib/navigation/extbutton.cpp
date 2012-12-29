@@ -26,11 +26,12 @@ ExtButton::ExtButton(QWidget* parent)
     setLayout(lay);
 
     m_button = new ToolButton(this);
-    m_button->setObjectName("navigation-button-reload");
-    m_button->setToolTip(ToolButton::tr("Reload"));
+    //m_button->setObjectName("navigation-button-reload");
+    //m_button->setToolTip(ToolButton::tr("Reload"));
     m_button->setToolButtonStyle(Qt::ToolButtonIconOnly);
     m_button->setAutoRaise(true);
     m_button->setFocusPolicy(Qt::NoFocus);
+	m_button->setText("123");
 
     lay->addWidget(m_button);
     lay->setContentsMargins(0, 0, 0, 0);
@@ -40,7 +41,10 @@ ExtButton::ExtButton(QWidget* parent)
 }
 
 void ExtButton::Test(){
-	qDebug() << "Test";
+	m_view = new QWebView(this);
+	QVariant vrr = m_view->page()->mainFrame()->evaluateJavaScript("1+2");
+	qDebug()<< "*** " << vrr.toString();
+	//qDebug() << "Test";
 }
 
 ExtButton::~ExtButton()

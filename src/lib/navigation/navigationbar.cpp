@@ -361,7 +361,8 @@ void NavigationBar::goForwardInNewTab()
     goAtHistoryIndexInNewTab(itemIndex);
 }
 
-void NavigationBar::addExtButton(){
+void NavigationBar::addExtButton(QString icon_name){
 	m_ExtButton.push_back(new ExtButton());
+	m_ExtButton[m_ExtButton.size() - 1]->button()->setIcon(QIcon(icon_name));
 	m_layout_ext->addWidget(m_ExtButton[m_ExtButton.size() - 1]);
 }

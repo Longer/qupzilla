@@ -64,7 +64,7 @@ public slots:
     void goForward();
     void goForwardInNewTab();
 
-	void addExtButton();
+	void addExtButton(QString icon_name);
 
 private slots:
     void aboutToShowHistoryNextMenu();

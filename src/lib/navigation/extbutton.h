@@ -19,9 +19,15 @@
 #define EXTBUTTON_H
 
 #include <QDebug>
+#include <QWebView>
+#include <QWebFrame>
+//#include <QWebElement>
+
 
 #include "qz_namespace.h"
 #include "toolbutton.h"
+
+//class QWebView;
 
 class QT_QUPZILLA_EXPORT ExtButton : public QWidget
 {
@@ -37,6 +43,7 @@ public slots:
 
 private:
     ToolButton* m_button;
+	QWebView* m_view;
 };
 
 #endif // EXTBUTTON_H

@@ -41,6 +41,7 @@
 #include "mainapplication.h"
 #include "aboutdialog.h"
 #include "pluginproxy.h"
+#include "extensions.h"
 #include "checkboxdialog.h"
 #include "adblockmanager.h"
 #include "clickablelabel.h"
@@ -220,6 +221,7 @@ void QupZilla::postLaunch()
     aboutToHideEditMenu();
 
     mApp->plugins()->emitMainWindowCreated(this);
+	mApp->extensions()->emitMainWindowCreated(this);
     emit startingCompleted();
 
     m_isStarting = false;
@@ -1880,6 +1882,7 @@ void QupZilla::disconnectObjects()
     }
 
     mApp->plugins()->emitMainWindowDeleted(this);
+	mApp->extensions()->emitMainWindowDeleted(this);
 }
 
 void QupZilla::closeWindow()

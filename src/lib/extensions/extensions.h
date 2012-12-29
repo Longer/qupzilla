@@ -24,6 +24,7 @@
 
 #include "qz_namespace.h"
 
+class QupZilla;
 
 class QT_QUPZILLA_EXPORT Extensions : public QObject
 {
@@ -31,9 +32,17 @@ class QT_QUPZILLA_EXPORT Extensions : public QObject
 public:
 	explicit Extensions();
 	QString EXTENSIONSDIR;
-	//Extensions(QObject* parent);
+	
+	void loadExtensions(QupZilla* window);
+
+	void emitMainWindowCreated(QupZilla* window);
+	void emitMainWindowDeleted(QupZilla* window);
+
+signals:
+    void mainWindowCreated(QupZilla* window);
+    void mainWindowDeleted(QupZilla* window);
+
 private:
 	bool checkExtensionsDir();
-	void loadExtensions();
 };
 #endif // EXTENSIONS_H

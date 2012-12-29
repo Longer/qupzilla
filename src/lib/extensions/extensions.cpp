@@ -28,7 +28,7 @@ Extensions::Extensions()
 {
 	EXTENSIONSDIR = mApp->PROFILEDIR + "profiles/default/extensions/";
 	checkExtensionsDir();
-	loadExtensions();
+	//loadExtensions();
 }
 
 bool Extensions::checkExtensionsDir()
@@ -48,7 +48,7 @@ bool Extensions::checkExtensionsDir()
 	return dir.isReadable();
 }
 
-void Extensions::loadExtensions(){
+void Extensions::loadExtensions(QupZilla* window){
 	QDir dir(EXTENSIONSDIR);
 	QStringList dirs = dir.entryList(QDir::AllDirs);
 	
@@ -56,6 +56,22 @@ void Extensions::loadExtensions(){
 		if (d == "." || d == "..")
 			continue;
 		qDebug() << "Extension - " << d;
-		mApp->getWindow()->navigationBar()->addExtButton();
+		//mApp->getWindow()->navigationBar()->addExtButton(EXTENSIONSDIR + d + "/icon.png");
+		window->navigationBar()->addExtButton(EXTENSIONSDIR + d + "/icon.png");
 	}
 }
+
+
+void Extensions::emitMainWindowCreated(QupZilla* window)
+{
+    emit mainWindowCreated(window);
+	loadExtensions(window);
+}
+
+
+void Extensions::emitMainWindowDeleted(QupZilla* window)
+{
+    emit mainWindowDeleted(window);
+}
+
+
